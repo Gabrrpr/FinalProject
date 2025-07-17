@@ -1,0 +1,12 @@
+RewriteEngine On
+RewriteBase /FinalProject/public/
+
+# If the file or directory exists, serve it directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Otherwise, redirect all requests to index.php
+RewriteRule ^ index.php [QSA,L]
+
+
