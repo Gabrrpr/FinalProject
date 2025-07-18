@@ -41,14 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <h2>Register</h2>
 <?php if ($success): ?>
-    <p style="color:green;">Registration successful! <a href="/login">Login here</a>.</p>
+    <p style="color:green;">Registration successful! <a href="login">Login here</a>.</p>
 <?php else: ?>
     <?php if ($errors): ?>
         <ul style="color:red;">
             <?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?>
         </ul>
     <?php endif; ?>
-    <form method="POST" action="/register">
+    <form method="POST" action="register">
         <label>Username: <input type="text" name="username" required value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"></label><br>
         <label>Password: <input type="password" name="password" required></label><br>
         <label>Role:
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </label><br>
         <button type="submit">Register</button>
     </form>
-    <p>Already have an account? <a href="/login">Login here</a>.</p>
+    <p>Already have an account? <a href="login">Login here</a>.</p>
 <?php endif; ?>
 <?php
 require_once __DIR__ . '/../../templates/footer.php';

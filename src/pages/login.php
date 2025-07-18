@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../../templates/header.php';
 require_once __DIR__ . '/../db.php';
-session_start();
 
 $errors = [];
 
@@ -15,16 +14,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $db->prepare('SELECT id, username, password_hash, role FROM users WHERE username = ?');
         $stmt->execute([$username]);
         $user = $stmt->fetch();
-        if ($user && password_verify($password, $user['password_hash'])) {
+        if ($user && isset($user['password_hash']) && password_verify($password, $user['password_hash'])) {
             // Success: set session
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
             // Redirect based on role
             if ($user['role'] === 'admin') {
-                header('Location: /admin');
+                header('Location: admin');
             } else {
-                header('Location: /dashboard');
+                header('Location: dashboard');
             }
             exit;
         } else {
@@ -39,11 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?>
     </ul>
 <?php endif; ?>
-<form method="POST" action="/login">
+<form method="POST" action="login">
     <label>Username: <input type="text" name="username" required value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"></label><br>
     <label>Password: <input type="password" name="password" required></label><br>
     <button type="submit">Login</button>
 </form>
-<p>Don't have an account? <a href="/register">Register here</a>.</p>
+<p>Don't have an account? <a href="register">Register here</a>.</p>
 <?php
 require_once __DIR__ . '/../../templates/footer.php';

@@ -3,6 +3,13 @@
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
+// Normalize base path for subdirectory deployments
+$base = '/FinalProject/public';
+if (strpos($uri, $base) === 0) {
+    $uri = substr($uri, strlen($base));
+    if ($uri === '' || $uri === false) $uri = '/';
+}
+
 switch ($uri) {
     case '/':
     case '/index.php':
