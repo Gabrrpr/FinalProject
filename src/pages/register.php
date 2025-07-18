@@ -23,14 +23,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db = get_db();
         // Check if username exists
         $stmt = $db->prepare('SELECT id FROM users WHERE username = ?');
-        $stmt->execute([$username]);
-        if ($stmt->fetch()) {
+        $stmt->bind_param('s', $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->fetch_assoc()) {
             $errors[] = 'Username already taken.';
         } else {
             // Hash password
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $db->prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)');
-            if ($stmt->execute([$username, $hash, $role])) {
+            $stmt->bind_param('sss', $username, $hash, $role);
+            if ($stmt->execute()) {
                 $success = true;
             } else {
                 $errors[] = 'Registration failed. Please try again.';

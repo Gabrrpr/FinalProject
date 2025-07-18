@@ -7,8 +7,9 @@ require_once __DIR__ . '/../../templates/header.php';
         <h1 id="welcome-title"></h1>
         <p class="subtitle">Empowering secure, fair, and easy elections for everyone.</p>
         <div class="home-actions">
-            <a href="login" class="btn-primary">Login</a>
-            <a href="register" class="btn-secondary">Register</a>
+            <!-- Use these in your navigation/menu -->
+            <a href="/FinalProject/public/login">Login</a>
+            <a href="/FinalProject/public/register">Sign Up</a>
         </div>
     </div>
 </main>

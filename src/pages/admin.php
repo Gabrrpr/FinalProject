@@ -26,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_election'])) {
         $errors[] = 'End time must be after start time.';
     } else {
         $stmt = $db->prepare('INSERT INTO elections (name, start_time, end_time, status, created_by) VALUES (?, ?, ?, "upcoming", ?)');
-        if ($stmt->execute([$name, $start, $end, $_SESSION['user_id']])) {
+        $stmt->bind_param('sssi', $name, $start, $end, $_SESSION['user_id']);
+        if ($stmt->execute()) {
             $success[] = 'Election created successfully.';
         } else {
             $errors[] = 'Failed to create election.';
@@ -43,7 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_candidate'])) {
         $errors[] = 'Election and candidate name are required.';
     } else {
         $stmt = $db->prepare('INSERT INTO candidates (election_id, name, info) VALUES (?, ?, ?)');
-        if ($stmt->execute([$election_id, $candidate_name, $candidate_info])) {
+        $stmt->bind_param('iss', $election_id, $candidate_name, $candidate_info);
+        if ($stmt->execute()) {
             $success[] = 'Candidate added successfully.';
         } else {
             $errors[] = 'Failed to add candidate.';
@@ -52,9 +54,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_candidate'])) {
 }
 
 // Get all elections
-$elections = $db->query('SELECT * FROM elections ORDER BY id DESC')->fetchAll();
+$result = $db->query('SELECT * FROM elections ORDER BY id DESC');
+$elections = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 // Get all candidates grouped by election
-$candidates = $db->query('SELECT * FROM candidates ORDER BY election_id, id')->fetchAll();
+$result = $db->query('SELECT * FROM candidates ORDER BY election_id, id');
+$candidates = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 $candidates_by_election = [];
 foreach ($candidates as $c) {
     $candidates_by_election[$c['election_id']][] = $c;

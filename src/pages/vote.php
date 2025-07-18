@@ -1,5 +1,5 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user_id'])) {
     header('Location: /login');
     exit;
@@ -18,21 +18,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote_election_id'], $
     $candidate_id = $_POST['candidate_id'];
     // Check if user already voted in this election
     $stmt = $db->prepare('SELECT id FROM votes WHERE user_id = ? AND election_id = ?');
-    $stmt->execute([$user_id, $election_id]);
-    if ($stmt->fetch()) {
+    $stmt->bind_param('ii', $user_id, $election_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->fetch_assoc()) {
         $errors[] = 'You have already voted in this election.';
     } else {
         // Check if election is ongoing
         $now = date('Y-m-d H:i:s');
         $stmt = $db->prepare('SELECT * FROM elections WHERE id = ? AND start_time <= ? AND end_time >= ? AND status = "ongoing"');
-        $stmt->execute([$election_id, $now, $now]);
-        $election = $stmt->fetch();
+        $stmt->bind_param('iss', $election_id, $now, $now);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $election = $result->fetch_assoc();
         if (!$election) {
             $errors[] = 'Election is not active.';
         } else {
             // Record vote
             $stmt = $db->prepare('INSERT INTO votes (user_id, election_id, candidate_id) VALUES (?, ?, ?)');
-            if ($stmt->execute([$user_id, $election_id, $candidate_id])) {
+            $stmt->bind_param('iii', $user_id, $election_id, $candidate_id);
+            if ($stmt->execute()) {
                 $success[] = 'Vote submitted successfully!';
             } else {
                 $errors[] = 'Failed to submit vote.';
@@ -43,18 +48,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote_election_id'], $
 
 // Update election statuses (optional: auto-update based on time)
 $now = date('Y-m-d H:i:s');
-$db->prepare('UPDATE elections SET status = "ongoing" WHERE start_time <= ? AND end_time >= ?')->execute([$now, $now]);
-$db->prepare('UPDATE elections SET status = "ended" WHERE end_time < ?')->execute([$now]);
+$stmt = $db->prepare('UPDATE elections SET status = "ongoing" WHERE start_time <= ? AND end_time >= ?');
+$stmt->bind_param('ss', $now, $now);
+$stmt->execute();
+$stmt = $db->prepare('UPDATE elections SET status = "ended" WHERE end_time < ?');
+$stmt->bind_param('s', $now);
+$stmt->execute();
 
 // Get all ongoing elections
-$elections = $db->prepare('SELECT * FROM elections WHERE status = "ongoing" ORDER BY start_time ASC');
-$elections->execute();
-$elections = $elections->fetchAll();
+$stmt = $db->prepare('SELECT * FROM elections WHERE status = "ongoing" ORDER BY start_time ASC');
+$stmt->execute();
+$result = $stmt->get_result();
+$elections = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
 // Get all votes by this user
-$user_votes = $db->prepare('SELECT election_id FROM votes WHERE user_id = ?');
-$user_votes->execute([$user_id]);
-$voted_elections = array_column($user_votes->fetchAll(), 'election_id');
+$stmt = $db->prepare('SELECT election_id FROM votes WHERE user_id = ?');
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$voted_elections = $result ? array_column($result->fetch_all(MYSQLI_ASSOC), 'election_id') : [];
 
 // Get all candidates for ongoing elections
 $election_ids = array_column($elections, 'id');
