@@ -1,7 +1,12 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /login');
+    header('Location: /FinalProject/public/login');
+    exit;
+}
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    include_once __DIR__ . '/../../templates/header.php';
+    echo '<div style="margin:2em auto;max-width:600px;padding:2em;background:#fff;border-radius:12px;text-align:center;font-size:1.3em;box-shadow:0 2px 12px #0002;">This user isn\'t an admin.</div>';
     exit;
 }
 if ($_SESSION['role'] !== 'admin') {

@@ -11,11 +11,18 @@
     <h1>Automated Electronic Voting System</h1>
     <nav>
         <a href="/FinalProject/public/">Home</a>
-        <a href="/FinalProject/public/dashboard">Dashboard</a>
-        <a href="/FinalProject/public/vote">Vote</a>
-        <a href="/FinalProject/public/results">Results</a>
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <a href="/FinalProject/public/dashboard">Dashboard</a>
+            <a href="/FinalProject/public/vote">Vote</a>
+            <a href="/FinalProject/public/results">Results</a>
+        <?php endif; ?>
         <a href="/FinalProject/public/admin">Admin</a>
-        <a href="/FinalProject/public/logout">Logout</a> 
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <a href="/FinalProject/public/logout">Logout</a>
+        <?php else: ?>
+            <a href="/FinalProject/public/login">Login</a>
+            <a href="/FinalProject/public/register">Sign Up</a>
+        <?php endif; ?>
     </nav>
     <hr>
 </header>

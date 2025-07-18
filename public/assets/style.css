@@ -5,7 +5,7 @@ body {
     background: url('/FinalProject/public/assets/img/background.jpg') no-repeat center center fixed;
 }
 header, footer {
-    background: #222;
+    background: #303034;
     color: #fff;
     padding: 1em 2em;
 }

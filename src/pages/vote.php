@@ -75,7 +75,9 @@ if ($election_ids) {
     $in = implode(',', array_fill(0, count($election_ids), '?'));
     $stmt = $db->prepare('SELECT * FROM candidates WHERE election_id IN (' . $in . ') ORDER BY id');
     $stmt->execute($election_ids);
-    foreach ($stmt->fetchAll() as $c) {
+    $result = $stmt->get_result();
+    $candidates = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    foreach ($candidates as $c) {
         $candidates_by_election[$c['election_id']][] = $c;
     }
 }
